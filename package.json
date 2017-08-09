@@ -1,0 +1,55 @@
+{
+  "name": "qub-filesystem",
+  "version": "1.0.0",
+  "description": "A collection of common data structures and functions for working with the file system",
+  "main": "main",
+  "typings": "main",
+  "files": [
+    "output/sources/"
+  ],
+  "scripts": {
+    "build": "tsc -p .",
+    "prepublishOnly": "npm run build",
+    "test": "mocha --colors --require source-map-support/register --ui tdd output/tests/",
+    "coverage": "nyc npm test && open-cli output/coverage/Qub.ts.html",
+    "travis-test": "npm run setup && npm run build && nyc --reporter=text-lcov npm test | coveralls",
+    "setup": "npm install"
+  },
+  "nyc": {
+    "reporter": [
+      "html",
+      "text-summary"
+    ],
+    "report-dir": "output/coverage/",
+    "temp-directory": "output/.nyc_output/",
+    "exclude": [
+      "output/tests"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danschultequb/qub-typescript-filesystem.git"
+  },
+  "keywords": [
+    "qub"
+  ],
+  "author": "Dan Schulte",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danschultequb/qub-typescript-filesystem/issues"
+  },
+  "homepage": "https://github.com/danschultequb/qub-typescript-filesystem#readme",
+  "devDependencies": {
+    "@types/mocha": "2.2.41",
+    "@types/node": "8.0.7",
+    "coveralls": "2.13.1",
+    "mocha": "3.4.2",
+    "nyc": "11.0.3",
+    "open-cli": "1.0.5",
+    "source-map-support": "0.4.15",
+    "typescript": "2.4.1"
+  },
+  "dependencies": {
+    "qub": "^1.3.0"
+  }
+}
