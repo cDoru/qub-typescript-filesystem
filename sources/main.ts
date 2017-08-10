@@ -24,7 +24,9 @@ export abstract class FileSystem {
     /**
      * Get a reference to the home folder for the current user.
      */
-    public abstract getHomeFolder(): Folder;
+    public getHomeFolder(): Folder {
+        return this.getFolder(os.homedir());
+    }
 
     /**
      * Get whether or not the Volume at the provided path exists.
@@ -53,17 +55,111 @@ export class Path {
     }
 
     /**
+     * Get the normalized path of the provided pathString. A normalized path replaces all
+     * backslashes ("\") with forward slashes ("/") and removes any trailing slashes, unless the
+     * trailing slash is the root slash (such as "/" or "C:/").
+     * @param pathString The pathString to normalize.
+     */
+    public static normalizePathString(pathString: string): string {
+        let result: string = pathString;
+
+        if (pathString) {
+            result = "";
+
+            let previousCharacterWasSlash: boolean = false;
+            for (const character of pathString) {
+                if (character === "\\") {
+                    if (!previousCharacterWasSlash) {
+                        result += "/";
+                        previousCharacterWasSlash = true;
+                    }
+                }
+                else {
+                    if (character === "/") {
+                        if (!previousCharacterWasSlash) {
+                            result += character;
+                            previousCharacterWasSlash = true;
+                        }
+                    }
+                    else {
+                        result += character;
+                        previousCharacterWasSlash = false;
+                    }
+                }
+            }
+
+            if (result.endsWith("/") && result.length >= 2 && result[result.length - 2] !== ":") {
+                result = result.substring(0, result.length - 1);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Get the path to the parent of this path. If this path points at a root path (such as "/" or
+     * "C:/"), then undefined will be returned.
+     */
+    public static getParentPathString(pathString: string): string {
+        let parentPathString: string;
+
+
+        if (pathString) {
+            let i: number = pathString.length - 1;
+
+            // Skip trailing slashes.
+            while (i >= 0 && (pathString[i] === "/" || pathString[i] === "\\")) {
+                --i;
+            }
+
+            // If the pathString wasn't full of slashes and we're not pointing at the last character
+            // of a drive name ("C:").
+            if (i >= 0 && pathString[i] !== ":") {
+                // Skip folder name.
+                while (i >= 0 && pathString[i] !== "/" && pathString[i] !== "\\") {
+                    --i;
+                }
+
+                // Skip trailing slashes again, except for root slash (such as "/" or "C:/").
+                while (i >= 1 && (pathString[i] === "/" || pathString[i] === "\\") && pathString[i - 1] !== ":") {
+                    --i;
+                }
+
+                parentPathString = pathString.substring(0, i + 1);
+            }
+        }
+
+        return parentPathString;
+    }
+
+    /**
+     * Get the normalized version of this path. All backslashes will be converted to forward
+     * slashes, and any trailing slashes will be removed.
+     */
+    public normalize(): Path {
+        const pathString: string = this.toString();
+        const normalizedPathString: string = Path.normalizePathString(pathString);
+        return pathString === normalizedPathString ? this : new Path(normalizedPathString);
+    }
+
+    /**
+     * Get the path to the parent of this path. If this path points at only a root (such as "/" or
+     * "C:/"), then undefined will be returned.
+     */
+    public getParentPath(): Path {
+        const parentPathString: string = Path.getParentPathString(this._pathString);
+        return parentPathString ? new Path(parentPathString) : undefined;
+    }
+
+    /**
      * Get the string representation of this Path.
      */
     public toString(): string {
         return this._pathString;
     }
 
-    /**
-     * Get the Path to the parent Folder or Volume of this Path.
-     */
-    public getParentPath(): Path {
-        return undefined;
+    public equals(rhs: Path): boolean {
+        return !rhs ? false : Path.normalizePathString(this._pathString) === Path.normalizePathString(rhs._pathString);
     }
 }
 
