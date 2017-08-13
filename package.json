@@ -1,15 +1,18 @@
 {
   "name": "qub-filesystem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A collection of common data structures and functions for working with the file system",
   "main": "main",
   "typings": "main",
   "files": [
-    "output/sources/"
+    "*.js",
+    "*.js.map",
+    "*.d.ts"
   ],
   "scripts": {
     "build": "tsc -p .",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run setup && npm run build && cpy output/sources/* .",
+    "postpublish": "rimraf *.js && rimraf *.js.map && rimraf *.d.ts",
     "test": "mocha --colors --require source-map-support/register --ui tdd output/tests/",
     "coverage": "nyc npm test && open-cli output/coverage/index.html",
     "travis-test": "npm run setup && npm run build && nyc --reporter=text-lcov npm test | coveralls",
