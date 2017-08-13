@@ -50,7 +50,7 @@
     "mocha": "3.4.2",
     "nyc": "11.0.3",
     "open-cli": "1.0.5",
-    "rifraf": "^2.0.3",
+    "rimraf": "^2.6.1",
     "source-map-support": "0.4.15",
     "typescript": "2.4.1"
   },
