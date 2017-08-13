@@ -1,3 +1,7 @@
+### 1.0.2 (2017-08-13)
+
+- Update dependencies
+
 ### 1.0.1 (2017-08-13)
 
 - Fix package contents
