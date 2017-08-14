@@ -415,6 +415,148 @@ suite("mock", () => {
             });
         });
 
+        suite("deleteFolder()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFolder(undefined), false);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFolder(null), false);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFolder(""), false);
+            });
+
+            test(`with "folder"`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFolder("folder"), false);
+            });
+
+            test(`with "C:\\folder" when the root doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFolder("C:\\folder"), false);
+            });
+
+            test(`with "C:\\folder" when it doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                root.createFolder("sibling");
+                assert.deepStrictEqual(fileSystem.deleteFolder("C:\\folder"), false);
+            });
+
+            test(`with "C:\\folder" when it does exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                root.createFolder("folder");
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\folder"), true);
+
+                assert.deepStrictEqual(fileSystem.deleteFolder("C:\\folder"), true);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\folder"), false);
+            });
+
+            test(`with "C:\\parent\\folder" when it doesn't exist but its parent does`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                const parent: mock.Folder = root.createFolder("parent");
+                parent.createFolder("sibling");
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent\\folder"), false);
+
+                assert.deepStrictEqual(fileSystem.deleteFolder("C:\\parent\\folder"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent\\folder"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+            });
+
+            test(`with "C:\\parent\\folder" when it does exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                const parent: mock.Folder = root.createFolder("parent");
+                parent.createFolder("sibling");
+                parent.createFolder("folder");
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent\\folder"), true);
+
+                assert.deepStrictEqual(fileSystem.deleteFolder("C:\\parent\\folder"), true);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent\\folder"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+            });
+        });
+
+        suite("deleteFile()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFile(undefined), false);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFile(null), false);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFile(""), false);
+            });
+
+            test(`with "file"`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFile("file"), false);
+            });
+
+            test(`with "C:\\file" when the root doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.deleteFile("C:\\file"), false);
+            });
+
+            test(`with "C:\\file" when it doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                root.createFile("sibling");
+                assert.deepStrictEqual(fileSystem.deleteFile("C:\\file"), false);
+            });
+
+            test(`with "C:\\file" when it does exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                root.createFile("file");
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\file"), true);
+
+                assert.deepStrictEqual(fileSystem.deleteFile("C:\\file"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\file"), false);
+            });
+
+            test(`with "C:\\parent\\file" when it doesn't exist but its parent does`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                const parent: mock.Folder = root.createFolder("parent");
+                parent.createFile("sibling");
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\parent\\file"), false);
+
+                assert.deepStrictEqual(fileSystem.deleteFile("C:\\parent\\file"), false);
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\parent\\file"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+            });
+
+            test(`with "C:\\parent\\file" when it does exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("C:\\");
+                const parent: mock.Folder = root.createFolder("parent");
+                parent.createFile("sibling");
+                parent.createFile("file");
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\parent\\file"), true);
+
+                assert.deepStrictEqual(fileSystem.deleteFile("C:\\parent\\file"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("C:\\parent\\file"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("C:\\parent"), true);
+            });
+        });
+
         suite("fileExists()", () => {
             test(`with undefined`, () => {
                 const fileSystem = new mock.FileSystem();
