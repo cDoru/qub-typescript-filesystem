@@ -38,6 +38,27 @@ export class FileSystem extends main.FileSystem {
     }
 
     /**
+     * Delete the folder at the provided path and return whether or not the folder existed before it
+     * was deleted.
+     * @param folderPath The path to the folder to delete.
+     */
+    public deleteFolder(folderPath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const folderPathString: string = main.toString(folderPath);
+        if (folderPathString) {
+            try {
+                fs.rmdirSync(folderPathString);
+                result = true;
+            }
+            catch (error) {
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
      */
@@ -48,6 +69,27 @@ export class FileSystem extends main.FileSystem {
         if (filePathString) {
             const fileStats: fs.Stats = fs.statSync(filePathString);
             result = fileStats ? fileStats.isFile() : false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Delete the file at the provided path and return whether or not the file existed before it was
+     * deleted.
+     * @param filePath The path to the file to delete.
+     */
+    public deleteFile(filePath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const filePathString: string = main.toString(filePath);
+        if (filePathString) {
+            try {
+                fs.unlinkSync(filePathString);
+                result = true;
+            }
+            catch (error) {
+            }
         }
 
         return result;

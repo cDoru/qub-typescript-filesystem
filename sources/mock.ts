@@ -96,6 +96,24 @@ export class FileSystem extends main.FileSystem {
         return result;
     }
 
+    public deleteFolder(folderPath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const path: main.Path = main.toPath(folderPath);
+        if (path && path.toString()) {
+            const parentPath: main.Path = path.getParentPath();
+            if (parentPath && parentPath.toString()) {
+                const parent: Container = this.getMockContainer(parentPath);
+                if (parent) {
+                    const folderName: string = path.skipRootPath().getSegments().last();
+                    result = parent.deleteFolder(folderName);
+                }
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
@@ -117,6 +135,24 @@ export class FileSystem extends main.FileSystem {
                 if (currentContainer) {
                     const fileName: string = pathSegments.last();
                     result = currentContainer.getFile(fileName) ? true : false;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public deleteFile(filePath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const path: main.Path = main.toPath(filePath);
+        if (path && path.toString()) {
+            const parentPath: main.Path = path.getParentPath();
+            if (parentPath && parentPath.toString()) {
+                const parent: Container = this.getMockContainer(parentPath);
+                if (parent) {
+                    const fileName: string = path.skipRootPath().getSegments().last();
+                    result = parent.deleteFile(fileName);
                 }
             }
         }
@@ -161,9 +197,13 @@ export interface Container {
 
     createFolder(folderName: string): Folder;
 
+    deleteFolder(folderName: string): boolean;
+
     getFile(fileName: string): File;
 
     createFile(fileName: string): File;
+
+    deleteFile(fileName: string): boolean;
 }
 
 export class Root implements Container {
@@ -196,6 +236,22 @@ export class Root implements Container {
         return result;
     }
 
+    public deleteFolder(folderName: string): boolean {
+        let result: boolean = false;
+
+        const foldersCount: number = this._folders.getCount();
+        for (let i = 0; i < foldersCount; ++i) {
+            const folder: Folder = this._folders.get(i);
+            if (folder.getName() === folderName) {
+                result = true;
+                this._folders.removeAt(i);
+                break;
+            }
+        }
+
+        return result;
+    }
+
     public getFile(fileName: string): File {
         return this._files.first((file: File) => file.getName() === fileName);
     }
@@ -206,6 +262,22 @@ export class Root implements Container {
             result = new File(this._path.add(fileName));
             this._files.add(result);
         }
+        return result;
+    }
+
+    public deleteFile(fileName: string): boolean {
+        let result: boolean = false;
+
+        const fileCount: number = this._files.getCount();
+        for (let i = 0; i < fileCount; ++i) {
+            const file: File = this._files.get(i);
+            if (file.getName() === fileName) {
+                result = true;
+                this._files.removeAt(i);
+                break;
+            }
+        }
+
         return result;
     }
 }
@@ -240,6 +312,22 @@ export class Folder implements Container {
         return result;
     }
 
+    public deleteFolder(folderName: string): boolean {
+        let result: boolean = false;
+
+        const foldersCount: number = this._folders.getCount();
+        for (let i = 0; i < foldersCount; ++i) {
+            const folder: Folder = this._folders.get(i);
+            if (folder.getName() === folderName) {
+                result = true;
+                this._folders.removeAt(i);
+                break;
+            }
+        }
+
+        return result;
+    }
+
     public getFile(fileName: string): File {
         return this._files.first((file: File) => file.getName() === fileName);
     }
@@ -250,6 +338,22 @@ export class Folder implements Container {
             result = new File(this._path.add(fileName));
             this._files.add(result);
         }
+        return result;
+    }
+
+    public deleteFile(fileName: string): boolean {
+        let result: boolean = false;
+
+        const fileCount: number = this._files.getCount();
+        for (let i = 0; i < fileCount; ++i) {
+            const file: File = this._files.get(i);
+            if (file.getName() === fileName) {
+                result = true;
+                this._files.removeAt(i);
+                break;
+            }
+        }
+
         return result;
     }
 }
