@@ -77,6 +77,20 @@ export abstract class FileSystem {
     public abstract createFolder(folderPath: Path | string): boolean;
 
     /**
+     * Delete the folder at the provided path and return whether or not the folder existed before it
+     * was deleted.
+     * @param folderPath The path to the folder to delete.
+     */
+    public abstract deleteFolder(folderPath: Path | string): boolean;
+
+    /**
+     * Delete the file at the provided path and return whether or not the file existed before it was
+     * deleted.
+     * @param filePath The path to the file to delete.
+     */
+    public abstract deleteFile(filePath: Path | string): boolean;
+
+    /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
      */
@@ -431,6 +445,13 @@ export class Folder implements Container {
     }
 
     /**
+     * Delete this folder and return whether or not this folder existed before this delete call.
+     */
+    public delete(): boolean {
+        return this._fileSystem.deleteFolder(this._path);
+    }
+
+    /**
      * Get a reference to the folder at the provided path relative to this Folder.
      * @param folderPath The relative path to the folder.
      */
@@ -489,6 +510,13 @@ export class File implements Entry {
      */
     public create(): boolean {
         return this._fileSystem.createFile(this._path);
+    }
+
+    /**
+     * Delete this file and return whether or not this file existed before this delete call.
+     */
+    public delete(): boolean {
+        return this._fileSystem.deleteFile(this._path);
     }
 
     /**

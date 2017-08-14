@@ -46,10 +46,29 @@ export class FileSystem extends main.FileSystem {
         let result: boolean = false;
 
         const folderPathString: string = main.toString(folderPath);
+        if (folderPathString && !this.folderExists(folderPathString)) {
+            result = true;
+            fs.mkdirSync(folderPathString);
+        }
+
+        return result;
+    }
+
+    /**
+     * Delete the folder at the provided path and return whether or not the folder existed before it
+     * was deleted.
+     * @param folderPath The path to the folder to delete.
+     */
+    public deleteFolder(folderPath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const folderPathString: string = main.toString(folderPath);
         if (folderPathString) {
-            if (!this.folderExists(folderPathString)) {
+            try {
+                fs.rmdirSync(folderPathString);
                 result = true;
-                fs.mkdirSync(folderPathString);
+            }
+            catch (error) {
             }
         }
 
@@ -81,10 +100,29 @@ export class FileSystem extends main.FileSystem {
         let result: boolean = false;
 
         const filePathString: string = main.toString(filePath);
+        if (filePathString && !this.fileExists(filePathString)) {
+            result = true;
+            this.writeFileContentsAsString(filePathString, "");
+        }
+
+        return result;
+    }
+
+    /**
+     * Delete the file at the provided path and return whether or not the file existed before it was
+     * deleted.
+     * @param filePath The path to the file to delete.
+     */
+    public deleteFile(filePath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const filePathString: string = main.toString(filePath);
         if (filePathString) {
-            if (!this.fileExists(filePathString)) {
+            try {
+                fs.unlinkSync(filePathString);
                 result = true;
-                this.writeFileContentsAsString(filePathString, "");
+            }
+            catch (error) {
             }
         }
 
