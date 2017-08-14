@@ -3,31 +3,71 @@ import * as qub from "qub";
 import * as main from "./main";
 
 export class FileSystem extends main.FileSystem {
-    private _volumes = new qub.ArrayList<Volume>();
+    private _roots = new qub.ArrayList<Root>();
 
-    public getMockVolume(volumePath: main.Path | string): Volume {
-        const path: main.Path = main.toPath(volumePath);
-        const rootPath: main.Path = path.getRootPath();
-        return !rootPath ? undefined : this._volumes.first((volume: Volume) => volume.getPath().equals(rootPath));
+    public getMockRoot(rootPath: main.Path | string): Root {
+        const path: main.Path = main.toPath(rootPath);
+        const trimmedRootPath: main.Path = path.getRootPath();
+        return !trimmedRootPath ? undefined : this._roots.first((root: Root) => root.getPath().equals(trimmedRootPath));
+    }
+
+    public getMockContainer(containerPath: main.Path | string): Container {
+        const path: main.Path = main.toPath(containerPath);
+
+        let result: Container = this.getMockRoot(path);
+        if (result) {
+            const pathSegments: qub.Iterable<string> = path.skipRootPath().getSegments();
+
+            if (pathSegments.any()) {
+                const folderNames: qub.Iterator<string> = pathSegments.iterate();
+                while (result && folderNames.next()) {
+                    result = result.getFolder(folderNames.getCurrent());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public getMockFolder(folderPath: main.Path | string): Folder {
+        const container: Container = this.getMockContainer(folderPath);
+        return container instanceof Folder ? container : undefined;
+    }
+
+    public getMockFile(filePath: main.Path | string): File {
+        const path: main.Path = main.toPath(filePath);
+
+        let result: File;
+        if (path && path.toString()) {
+            const containerPath: main.Path = path.getParentPath();
+            if (containerPath) {
+                const container: Container = this.getMockContainer(containerPath);
+                if (container) {
+                    result = container.getFile(path.getSegments().last());
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
-     * Get whether or not the Volume at the provided path exists.
-     * @param volumePath The path to the Volume.
+     * Get whether or not the Root at the provided path exists.
+     * @param rootPath The path to the Root.
      */
-    public volumeExists(volumePath: main.Path | string): boolean {
-        return !!this.getMockVolume(volumePath);
+    public rootExists(rootPath: main.Path | string): boolean {
+        return !!this.getMockRoot(rootPath);
     }
 
     /**
-     * Create a volume at the provided volumePath in this mock FileSystem.
-     * @param volumePath The path to the volume to create.
+     * Create a root at the provided rootPath in this mock FileSystem.
+     * @param rootPath The path to the root to create.
      */
-    public createMockVolume(volumePath: main.Path | string): Volume {
-        let result: Volume = this.getMockVolume(volumePath);
-        if (!result && volumePath) {
-            result = new Volume(volumePath);
-            this._volumes.add(result);
+    public createMockRoot(rootPath: main.Path | string): Root {
+        let result: Root = this.getMockRoot(rootPath);
+        if (!result && rootPath) {
+            result = new Root(rootPath);
+            this._roots.add(result);
         }
         return result;
     }
@@ -40,7 +80,7 @@ export class FileSystem extends main.FileSystem {
         const path: main.Path = main.toPath(folderPath);
 
         let result: boolean = false;
-        let currentContainer: Container = this.getMockVolume(path);
+        let currentContainer: Container = this.getMockRoot(path);
         if (currentContainer) {
             const pathSegments: qub.Iterable<string> = path.skipRootPath().getSegments();
 
@@ -66,7 +106,7 @@ export class FileSystem extends main.FileSystem {
         let result: boolean = false;
         const pathString: string = path.toString();
         if (pathString && !pathString.endsWith("/") && !pathString.endsWith("\\")) {
-            let currentContainer: Container = this.getMockVolume(path);
+            let currentContainer: Container = this.getMockRoot(path);
             if (currentContainer) {
                 const pathSegments: qub.Iterable<string> = path.skipRootPath().getSegments();
                 const folderNames: qub.Iterator<string> = pathSegments.skipLast(1).iterate();
@@ -83,6 +123,37 @@ export class FileSystem extends main.FileSystem {
 
         return result;
     }
+
+    /**
+     * Read the contents of the file at the provided filePath as a UTF-8 string. If the file doesn't
+     * exist, then undefined will be returned.
+     */
+    public readFileContentsAsString(filePath: main.Path | string): string {
+        const file: File = this.getMockFile(filePath);
+        return file ? file.getContentsAsString() : undefined;
+    }
+
+    /**
+     * Write the provided string contents to the file at the provided file path using UTF-8
+     * encoding. If the file doesn't exist, then it will be created.
+     */
+    public writeFileContentsAsString(filePath: main.Path | string, fileContents: string): void {
+        const path: main.Path = main.toPath(filePath);
+        if (path && path.toString()) {
+            const containerPath: main.Path = path.getParentPath();
+            if (containerPath && containerPath.toString()) {
+                let currentContainer: Container = this.createMockRoot(containerPath.getRootPath());
+
+                const folderNames: qub.Iterable<string> = containerPath.skipRootPath().getSegments();
+                for (const folderName of folderNames) {
+                    currentContainer = currentContainer.createFolder(folderName);
+                }
+
+                const file: File = currentContainer.createFile(path.getSegments().last());
+                file.setContentsAsString(fileContents);
+            }
+        }
+    }
 }
 
 export interface Container {
@@ -95,7 +166,7 @@ export interface Container {
     createFile(fileName: string): File;
 }
 
-export class Volume implements Container {
+export class Root implements Container {
     private _path: main.Path;
     private _folders = new qub.ArrayList<Folder>();
     private _files = new qub.ArrayList<File>();
@@ -185,12 +256,22 @@ export class Folder implements Container {
 
 export class File {
     private _path: main.Path;
+    private _contents: string;
 
     constructor(path: main.Path | string) {
         this._path = main.toPath(path);
+        this._contents = "";
     }
 
     public getName(): string {
         return this._path.getSegments().last();
+    }
+
+    public getContentsAsString(): string {
+        return this._contents;
+    }
+
+    public setContentsAsString(contents: string): void {
+        this._contents = contents ? contents : "";
     }
 }

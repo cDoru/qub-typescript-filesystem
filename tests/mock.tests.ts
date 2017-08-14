@@ -7,118 +7,356 @@ import * as mock from "../sources/mock";
 
 suite("mock", () => {
     suite("FileSystem", () => {
-        suite("getMockVolume()", () => {
-            test(`with no volumes and undefined path`, () => {
+        suite("getMockContainer()", () => {
+            test(`with no roots and undefined path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(undefined), undefined);
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(undefined), undefined);
             });
 
-            test(`with volumes and undefined path`, () => {
+            test(`with roots and undefined path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                mockFileSystem.createMockVolume("C:/");
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(undefined), undefined);
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(undefined), undefined);
             });
 
-            test(`with no volumes and null path`, () => {
+            test(`with no roots and null path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(null), undefined);
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(null), undefined);
             });
 
-            test(`with volumes and null path`, () => {
+            test(`with roots and null path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                mockFileSystem.createMockVolume("C:/");
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(null), undefined);
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(null), undefined);
             });
 
-            test(`with no volumes and empty path`, () => {
+            test(`with no roots and empty path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(""), undefined);
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(""), undefined);
             });
 
-            test(`with volumes and empty path`, () => {
+            test(`with roots and empty path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                mockFileSystem.createMockVolume("C:/");
-                assert.deepStrictEqual(mockFileSystem.getMockVolume(""), undefined);
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer(""), undefined);
             });
 
-            test(`with no volumes and not matching path`, () => {
+            test(`with no roots and not matching path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(mockFileSystem.getMockVolume("A:/"), undefined);
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("A:/"), undefined);
             });
 
-            test(`with volumes and not matching path`, () => {
+            test(`with roots and not matching path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                mockFileSystem.createMockVolume("C:/");
-                assert.deepStrictEqual(mockFileSystem.getMockVolume("A:/"), undefined);
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("A:/"), undefined);
             });
 
-            test(`with no volumes and matching path`, () => {
+            test(`with no roots and matching path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(mockFileSystem.getMockVolume("C:/"), undefined);
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("C:/"), undefined);
             });
 
-            test(`with volumes and matching path`, () => {
+            test(`with roots and matching path`, () => {
                 const mockFileSystem = new mock.FileSystem();
-                mockFileSystem.createMockVolume("C:/");
-                assert.deepStrictEqual(mockFileSystem.getMockVolume("C:/"), new mock.Volume("C:/"));
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("C:/"), new mock.Root("C:/"));
+            });
+
+            test(`with roots and non-matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("C:/nope"), undefined);
+            });
+
+            test(`with roots and matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                root.createFolder("nope");
+                assert.deepStrictEqual(mockFileSystem.getMockContainer("C:/nope"), new mock.Folder("C:/nope"));
             });
         });
 
-        suite("volumeExists()", () => {
+        suite("getMockFolder()", () => {
+            test(`with no roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(undefined), undefined);
+            });
+
+            test(`with roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(undefined), undefined);
+            });
+
+            test(`with no roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(null), undefined);
+            });
+
+            test(`with roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(null), undefined);
+            });
+
+            test(`with no roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(""), undefined);
+            });
+
+            test(`with roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder(""), undefined);
+            });
+
+            test(`with no roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("A:/"), undefined);
+            });
+
+            test(`with roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("A:/"), undefined);
+            });
+
+            test(`with no roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("C:/"), undefined);
+            });
+
+            test(`with roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("C:/"), undefined);
+            });
+
+            test(`with roots and non-matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("C:/nope"), undefined);
+            });
+
+            test(`with roots and matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                root.createFolder("nope");
+                assert.deepStrictEqual(mockFileSystem.getMockFolder("C:/nope"), new mock.Folder("C:/nope"));
+            });
+        });
+
+        suite("getMockFile()", () => {
+            test(`with no roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFile(undefined), undefined);
+            });
+
+            test(`with roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile(undefined), undefined);
+            });
+
+            test(`with no roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFile(null), undefined);
+            });
+
+            test(`with roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile(null), undefined);
+            });
+
+            test(`with no roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFile(""), undefined);
+            });
+
+            test(`with roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile(""), undefined);
+            });
+
+            test(`with no roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFile("A:/"), undefined);
+            });
+
+            test(`with roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("A:/"), undefined);
+            });
+
+            test(`with no roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/"), undefined);
+            });
+
+            test(`with roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/"), undefined);
+            });
+
+            test(`with roots and non-matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope"), undefined);
+            });
+
+            test(`with roots and matching folder path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                root.createFolder("nope");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope"), undefined);
+            });
+
+            test(`with roots and matching file path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                root.createFile("nope");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope"), new mock.File("C:/nope"));
+            });
+
+            test(`with missing folder and non-matching file path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope/ishere"), undefined);
+            });
+
+            test(`with folders and non-matching file path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                root.createFolder("nope");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope/ishere"), undefined);
+            });
+
+            test(`with folders and matching file path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                const root: mock.Root = mockFileSystem.createMockRoot("C:/");
+                const nope: mock.Folder = root.createFolder("nope");
+                nope.createFile("ishere");
+                assert.deepStrictEqual(mockFileSystem.getMockFile("C:/nope/ishere"), new mock.File("C:/nope/ishere"));
+            });
+        });
+
+        suite("getMockRoot()", () => {
+            test(`with no roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(undefined), undefined);
+            });
+
+            test(`with roots and undefined path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(undefined), undefined);
+            });
+
+            test(`with no roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(null), undefined);
+            });
+
+            test(`with roots and null path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(null), undefined);
+            });
+
+            test(`with no roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(""), undefined);
+            });
+
+            test(`with roots and empty path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockRoot(""), undefined);
+            });
+
+            test(`with no roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockRoot("A:/"), undefined);
+            });
+
+            test(`with roots and not matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockRoot("A:/"), undefined);
+            });
+
+            test(`with no roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(mockFileSystem.getMockRoot("C:/"), undefined);
+            });
+
+            test(`with roots and matching path`, () => {
+                const mockFileSystem = new mock.FileSystem();
+                mockFileSystem.createMockRoot("C:/");
+                assert.deepStrictEqual(mockFileSystem.getMockRoot("C:/"), new mock.Root("C:/"));
+            });
+        });
+
+        suite("rootExists()", () => {
             test(`with undefined`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.volumeExists(undefined), false);
+                assert.deepStrictEqual(fileSystem.rootExists(undefined), false);
             });
 
             test(`with null`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.volumeExists(null), false);
+                assert.deepStrictEqual(fileSystem.rootExists(null), false);
             });
 
             test(`with ""`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.volumeExists(""), false);
+                assert.deepStrictEqual(fileSystem.rootExists(""), false);
             });
 
             test(`with "/" when it doesn't exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.volumeExists("/"), false);
+                assert.deepStrictEqual(fileSystem.rootExists("/"), false);
             });
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
-                assert.deepStrictEqual(fileSystem.volumeExists("/"), true);
+                fileSystem.createMockRoot("/");
+                assert.deepStrictEqual(fileSystem.rootExists("/"), true);
             });
         });
 
-        suite("createMockVolume()", () => {
+        suite("createMockRoot()", () => {
             test(`with undefined`, () => {
                 const fileSystem = new mock.FileSystem();
-                const createdVolume: mock.Volume = fileSystem.createMockVolume(undefined);
-                assert.deepStrictEqual(createdVolume, undefined);
-                assert.deepStrictEqual(fileSystem.getMockVolume(undefined), undefined);
+                const createdRoot: mock.Root = fileSystem.createMockRoot(undefined);
+                assert.deepStrictEqual(createdRoot, undefined);
+                assert.deepStrictEqual(fileSystem.getMockRoot(undefined), undefined);
             });
 
             test(`with null`, () => {
                 const fileSystem = new mock.FileSystem();
-                const createdVolume: mock.Volume = fileSystem.createMockVolume(null);
-                assert.deepStrictEqual(createdVolume, undefined);
-                assert.deepStrictEqual(fileSystem.getMockVolume(null), undefined);
+                const createdRoot: mock.Root = fileSystem.createMockRoot(null);
+                assert.deepStrictEqual(createdRoot, undefined);
+                assert.deepStrictEqual(fileSystem.getMockRoot(null), undefined);
             });
 
             test(`with ""`, () => {
                 const fileSystem = new mock.FileSystem();
-                const createdVolume: mock.Volume = fileSystem.createMockVolume("");
-                assert.deepStrictEqual(createdVolume, undefined);
-                assert.deepStrictEqual(fileSystem.getMockVolume(""), undefined);
+                const createdRoot: mock.Root = fileSystem.createMockRoot("");
+                assert.deepStrictEqual(createdRoot, undefined);
+                assert.deepStrictEqual(fileSystem.getMockRoot(""), undefined);
             });
 
             test(`with "Y:\\"`, () => {
                 const fileSystem = new mock.FileSystem();
-                const createdVolume: mock.Volume = fileSystem.createMockVolume("Y:\\");
-                assert.deepStrictEqual(createdVolume, new mock.Volume("Y:\\"));
-                assert.deepStrictEqual(fileSystem.getMockVolume("Y:\\"), new mock.Volume("Y:\\"));
+                const createdRoot: mock.Root = fileSystem.createMockRoot("Y:\\");
+                assert.deepStrictEqual(createdRoot, new mock.Root("Y:\\"));
+                assert.deepStrictEqual(fileSystem.getMockRoot("Y:\\"), new mock.Root("Y:\\"));
             });
         });
 
@@ -145,7 +383,7 @@ suite("mock", () => {
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.folderExists("/"), false);
             });
 
@@ -156,22 +394,22 @@ suite("mock", () => {
 
             test(`with "/hello" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFolder("hello");
                 assert.deepStrictEqual(fileSystem.folderExists("/hello"), true);
             });
 
             test(`with "/hello/there" when it doesn't exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFolder("hello");
                 assert.deepStrictEqual(fileSystem.folderExists("/hello/there"), false);
             });
 
             test(`with "/hello/there" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                const hello: mock.Folder = volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                const hello: mock.Folder = Root.createFolder("hello");
                 hello.createFolder("there");
                 assert.deepStrictEqual(fileSystem.folderExists("/hello/there"), true);
             });
@@ -200,7 +438,7 @@ suite("mock", () => {
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.fileExists("/"), false);
             });
 
@@ -211,58 +449,199 @@ suite("mock", () => {
 
             test(`with "/hello" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFile("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFile("hello");
                 assert.deepStrictEqual(fileSystem.fileExists("/hello"), true);
             });
 
             test(`with "/hello/there" when "hello" doesn't exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.fileExists("/hello/there"), false);
             });
 
             test(`with "/hello/there" when "there" doesn't exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFolder("hello");
                 assert.deepStrictEqual(fileSystem.fileExists("/hello/there"), false);
             });
 
             test(`with "/hello/there" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                const hello: mock.Folder = volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                const hello: mock.Folder = Root.createFolder("hello");
                 hello.createFile("there");
                 assert.deepStrictEqual(fileSystem.fileExists("/hello/there"), true);
             });
         });
 
-        suite("getVolume()", () => {
+        suite("readFileContentsAsString()", () => {
+            test("when root doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), undefined);
+            });
+
+            test("when file exists under root with no content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                root.createFile("file.txt");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), "");
+            });
+
+            test("when file exists under root with content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const file: mock.File = root.createFile("file.txt");
+                file.setContentsAsString("hello there!");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), "hello there!");
+            });
+
+            test("when parent folder doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.createMockRoot("/");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), undefined);
+            });
+
+            test("when parent folder exists, but file doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                root.createFolder("folder");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), undefined);
+            });
+
+            test("when parent folder and file both exist, but file has no content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const folder: mock.Folder = root.createFolder("folder");
+                folder.createFile("file.txt");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "");
+            });
+
+            test("when parent folder and file both exist, but file has no content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const folder: mock.Folder = root.createFolder("folder");
+                const file: mock.File = folder.createFile("file.txt");
+                file.setContentsAsString("I did it again!");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "I did it again!");
+            });
+        });
+
+        suite("writeFileContentsAsString()", () => {
+            test(`with undefined filePath`, () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.writeFileContentsAsString(undefined, "A");
+            });
+
+            test(`with null filePath`, () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.writeFileContentsAsString(null, "A");
+            });
+
+            test(`with root filePath`, () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.writeFileContentsAsString("/", "A");
+            });
+
+            test("when root doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.writeFileContentsAsString("/file.txt", "A");
+                assert.deepStrictEqual(fileSystem.rootExists("/"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("/file.txt"), true);
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), "A");
+            });
+
+            test("when file exists under root with no content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                root.createFile("file.txt");
+                fileSystem.writeFileContentsAsString("/file.txt", "B");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), "B");
+            });
+
+            test("when file exists under root with content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const file: mock.File = root.createFile("file.txt");
+                file.setContentsAsString("hello there!");
+                fileSystem.writeFileContentsAsString("/file.txt", "C");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/file.txt"), "C");
+            });
+
+            test("when parent folder doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                fileSystem.createMockRoot("/");
+                fileSystem.writeFileContentsAsString("/folder/file.txt", "D");
+                assert.deepStrictEqual(fileSystem.folderExists("/folder"), true);
+                assert.deepStrictEqual(fileSystem.fileExists("/folder/file.txt"), true);
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "D");
+            });
+
+            test("when parent folder exists, but file doesn't exist", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                root.createFolder("folder");
+                fileSystem.writeFileContentsAsString("/folder/file.txt", "E");
+                assert.deepStrictEqual(fileSystem.fileExists("/folder/file.txt"), true);
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "E");
+            });
+
+            test("when parent folder and file both exist, but file has no content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const folder: mock.Folder = root.createFolder("folder");
+                folder.createFile("file.txt");
+                fileSystem.writeFileContentsAsString("/folder/file.txt", "F");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "F");
+            });
+
+            test("when parent folder and file both exist and file has content", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const folder: mock.Folder = root.createFolder("folder");
+                const file: mock.File = folder.createFile("file.txt");
+                file.setContentsAsString("I did it again!");
+                fileSystem.writeFileContentsAsString("/folder/file.txt", "G");
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "G");
+            });
+
+            test("when parent folder and file both exist and file has content, but new content is undefined", () => {
+                const fileSystem = new mock.FileSystem();
+                const root: mock.Root = fileSystem.createMockRoot("/");
+                const folder: mock.Folder = root.createFolder("folder");
+                const file: mock.File = folder.createFile("file.txt");
+                file.setContentsAsString("I did it again!");
+                fileSystem.writeFileContentsAsString("/folder/file.txt", undefined);
+                assert.deepStrictEqual(fileSystem.readFileContentsAsString("/folder/file.txt"), "");
+            });
+        });
+
+        suite("getRoot()", () => {
             test(`with undefined`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.getVolume(undefined), undefined);
+                assert.deepStrictEqual(fileSystem.getRoot(undefined), undefined);
             });
 
             test(`with null`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.getVolume(null), undefined);
+                assert.deepStrictEqual(fileSystem.getRoot(null), undefined);
             });
 
             test(`with ""`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.getVolume(""), undefined);
+                assert.deepStrictEqual(fileSystem.getRoot(""), undefined);
             });
 
             test(`with "/" when it doesn't exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                assert.deepStrictEqual(fileSystem.getVolume("/"), new main.Volume(fileSystem, new main.Path("/")));
+                assert.deepStrictEqual(fileSystem.getRoot("/"), new main.Root(fileSystem, new main.Path("/")));
             });
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
-                assert.deepStrictEqual(fileSystem.getVolume("/"), new main.Volume(fileSystem, new main.Path("/")));
+                fileSystem.createMockRoot("/");
+                assert.deepStrictEqual(fileSystem.getRoot("/"), new main.Root(fileSystem, new main.Path("/")));
             });
         });
 
@@ -289,7 +668,7 @@ suite("mock", () => {
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.getFolder("/"), new main.Folder(fileSystem, new main.Path("/")));
             });
 
@@ -300,8 +679,8 @@ suite("mock", () => {
 
             test(`with "/hello" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFolder("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFolder("hello");
                 assert.deepStrictEqual(fileSystem.getFolder("/hello"), new main.Folder(fileSystem, new main.Path("/hello")));
             });
         });
@@ -329,7 +708,7 @@ suite("mock", () => {
 
             test(`with "/" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.getFile("/"), undefined);
             });
 
@@ -340,7 +719,7 @@ suite("mock", () => {
 
             test(`with "\\" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                fileSystem.createMockVolume("/");
+                fileSystem.createMockRoot("/");
                 assert.deepStrictEqual(fileSystem.getFile("\\"), undefined);
             });
 
@@ -351,8 +730,8 @@ suite("mock", () => {
 
             test(`with "/hello" when it does exist`, () => {
                 const fileSystem = new mock.FileSystem();
-                const volume: mock.Volume = fileSystem.createMockVolume("/");
-                volume.createFile("hello");
+                const Root: mock.Root = fileSystem.createMockRoot("/");
+                Root.createFile("hello");
                 assert.deepStrictEqual(fileSystem.getFile("/hello"), new main.File(fileSystem, new main.Path("/hello")));
             });
         });
@@ -365,12 +744,12 @@ suite("mock", () => {
         });
     });
 
-    suite("Volume", () => {
+    suite("Root", () => {
         suite("constructor()", () => {
             function constructorTest(path: string): void {
                 test(`with ${qub.escapeAndQuote(path)}`, () => {
-                    const volume = new mock.Volume(path);
-                    assert.deepStrictEqual(volume.getPath(), main.toPath(path));
+                    const Root = new mock.Root(path);
+                    assert.deepStrictEqual(Root.getPath(), main.toPath(path));
                 });
             }
 
@@ -386,8 +765,8 @@ suite("mock", () => {
         suite("getName()", () => {
             function getNameTest(path: string): void {
                 test(`with ${qub.escapeAndQuote(path)}`, () => {
-                    const volume = new mock.Volume(path);
-                    assert.deepStrictEqual(volume.getName(), path);
+                    const Root = new mock.Root(path);
+                    assert.deepStrictEqual(Root.getName(), path);
                 });
             }
 
@@ -403,15 +782,15 @@ suite("mock", () => {
         suite("getFolder()", () => {
             function getFolderTest(folderName: string, folderExists: boolean = false): void {
                 test(`with folder name ${qub.escapeAndQuote(folderName)} that ${folderExists ? "exists" : "doesn't exist"}`, () => {
-                    const volumePath = new main.Path("C:/");
-                    const volume = new mock.Volume(volumePath);
+                    const RootPath = new main.Path("C:/");
+                    const Root = new mock.Root(RootPath);
 
                     if (folderExists && folderName) {
-                        volume.createFolder(folderName);
+                        Root.createFolder(folderName);
                     }
 
-                    const folder: mock.Folder = volume.getFolder(folderName);
-                    assert.deepStrictEqual(folder, folderExists ? new mock.Folder(volumePath.add(folderName)) : undefined);
+                    const folder: mock.Folder = Root.getFolder(folderName);
+                    assert.deepStrictEqual(folder, folderExists ? new mock.Folder(RootPath.add(folderName)) : undefined);
                 });
             }
 
@@ -424,46 +803,46 @@ suite("mock", () => {
 
         suite("createFolder()", () => {
             test(`with undefined`, () => {
-                const volume = new mock.Volume("/");
-                const createdFolder: mock.Folder = volume.createFolder(undefined);
+                const Root = new mock.Root("/");
+                const createdFolder: mock.Folder = Root.createFolder(undefined);
                 assert.deepStrictEqual(createdFolder, undefined);
-                assert.deepStrictEqual(volume.getFolder(undefined), undefined);
+                assert.deepStrictEqual(Root.getFolder(undefined), undefined);
             });
 
             test(`with null`, () => {
-                const volume = new mock.Volume("/");
-                const createdFolder: mock.Folder = volume.createFolder(null);
+                const Root = new mock.Root("/");
+                const createdFolder: mock.Folder = Root.createFolder(null);
                 assert.deepStrictEqual(createdFolder, undefined);
-                assert.deepStrictEqual(volume.getFolder(null), undefined);
+                assert.deepStrictEqual(Root.getFolder(null), undefined);
             });
 
             test(`with ""`, () => {
-                const volume = new mock.Volume("/");
-                const createdFolder: mock.Folder = volume.createFolder("");
+                const Root = new mock.Root("/");
+                const createdFolder: mock.Folder = Root.createFolder("");
                 assert.deepStrictEqual(createdFolder, undefined);
-                assert.deepStrictEqual(volume.getFolder(""), undefined);
+                assert.deepStrictEqual(Root.getFolder(""), undefined);
             });
 
             test(`with "a"`, () => {
-                const volume = new mock.Volume("/");
-                const createdFolder: mock.Folder = volume.createFolder("a");
+                const Root = new mock.Root("/");
+                const createdFolder: mock.Folder = Root.createFolder("a");
                 assert.deepStrictEqual(createdFolder, new mock.Folder("/a"));
-                assert.deepStrictEqual(volume.getFolder("a"), new mock.Folder("/a"));
+                assert.deepStrictEqual(Root.getFolder("a"), new mock.Folder("/a"));
             });
         });
 
         suite("getFile()", () => {
             function getFileTest(fileName: string, fileExists: boolean = false): void {
                 test(`with file name ${qub.escapeAndQuote(fileName)} that ${fileExists ? "exists" : "doesn't exist"}`, () => {
-                    const volumePath = new main.Path("C:/");
-                    const volume = new mock.Volume(volumePath);
+                    const RootPath = new main.Path("C:/");
+                    const Root = new mock.Root(RootPath);
 
                     if (fileExists && fileName) {
-                        volume.createFile(fileName);
+                        Root.createFile(fileName);
                     }
 
-                    const file: mock.File = volume.getFile(fileName);
-                    assert.deepStrictEqual(file, fileExists ? new mock.File(volumePath.add(fileName)) : undefined);
+                    const file: mock.File = Root.getFile(fileName);
+                    assert.deepStrictEqual(file, fileExists ? new mock.File(RootPath.add(fileName)) : undefined);
                 });
             }
 
@@ -476,31 +855,31 @@ suite("mock", () => {
 
         suite("createFile()", () => {
             test(`with undefined`, () => {
-                const volume = new mock.Volume("/");
-                const createdFile: mock.File = volume.createFile(undefined);
+                const Root = new mock.Root("/");
+                const createdFile: mock.File = Root.createFile(undefined);
                 assert.deepStrictEqual(createdFile, undefined);
-                assert.deepStrictEqual(volume.getFile(undefined), undefined);
+                assert.deepStrictEqual(Root.getFile(undefined), undefined);
             });
 
             test(`with null`, () => {
-                const volume = new mock.Volume("/");
-                const createdFile: mock.File = volume.createFile(null);
+                const Root = new mock.Root("/");
+                const createdFile: mock.File = Root.createFile(null);
                 assert.deepStrictEqual(createdFile, undefined);
-                assert.deepStrictEqual(volume.getFile(null), undefined);
+                assert.deepStrictEqual(Root.getFile(null), undefined);
             });
 
             test(`with ""`, () => {
-                const volume = new mock.Volume("/");
-                const createdFile: mock.File = volume.createFile("");
+                const Root = new mock.Root("/");
+                const createdFile: mock.File = Root.createFile("");
                 assert.deepStrictEqual(createdFile, undefined);
-                assert.deepStrictEqual(volume.getFile(""), undefined);
+                assert.deepStrictEqual(Root.getFile(""), undefined);
             });
 
             test(`with "a"`, () => {
-                const volume = new mock.Volume("/");
-                const createdFile: mock.File = volume.createFile("a");
+                const Root = new mock.Root("/");
+                const createdFile: mock.File = Root.createFile("a");
                 assert.deepStrictEqual(createdFile, new mock.File("/a"));
-                assert.deepStrictEqual(volume.getFile("a"), new mock.File("/a"));
+                assert.deepStrictEqual(Root.getFile("a"), new mock.File("/a"));
             });
         });
     });
