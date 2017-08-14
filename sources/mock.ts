@@ -97,6 +97,66 @@ export class FileSystem extends main.FileSystem {
     }
 
     /**
+     * Create the folder at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the folder was created as a result of this call.
+     * @param folderPath The path to the folder to create.
+     */
+    public createFolder(folderPath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const path: main.Path = main.toPath(folderPath);
+        if (path && path.toString()) {
+            const containerPath: main.Path = path.getParentPath();
+            if (containerPath && containerPath.toString()) {
+                let currentContainer: Container = this.createMockRoot(containerPath.getRootPath());
+
+                const folderNames: qub.Iterable<string> = containerPath.skipRootPath().getSegments();
+                for (const folderName of folderNames) {
+                    currentContainer = currentContainer.createFolder(folderName);
+                }
+
+                const folderName: string = path.skipRootPath().getSegments().last();
+                if (!currentContainer.getFolder(folderName)) {
+                    result = true;
+                    currentContainer.createFolder(folderName);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Create the file at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the file was created as a result of this call.
+     * @param filePath The path to the file to create.
+     */
+    public createFile(filePath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const path: main.Path = main.toPath(filePath);
+        if (path && path.toString()) {
+            const containerPath: main.Path = path.getParentPath();
+            if (containerPath && containerPath.toString()) {
+                let currentContainer: Container = this.createMockRoot(containerPath.getRootPath());
+
+                const folderNames: qub.Iterable<string> = containerPath.skipRootPath().getSegments();
+                for (const folderName of folderNames) {
+                    currentContainer = currentContainer.createFolder(folderName);
+                }
+
+                const fileName: string = path.skipRootPath().getSegments().last();
+                if (!currentContainer.getFile(fileName)) {
+                    result = true;
+                    currentContainer.createFile(fileName);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
      */

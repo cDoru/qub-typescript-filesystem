@@ -38,6 +38,25 @@ export class FileSystem extends main.FileSystem {
     }
 
     /**
+     * Create the folder at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the folder was created as a result of this call.
+     * @param folderPath The path to the folder to create.
+     */
+    public createFolder(folderPath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const folderPathString: string = main.toString(folderPath);
+        if (folderPathString) {
+            if (!this.folderExists(folderPathString)) {
+                result = true;
+                fs.mkdirSync(folderPathString);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
      */
@@ -48,6 +67,25 @@ export class FileSystem extends main.FileSystem {
         if (filePathString) {
             const fileStats: fs.Stats = fs.statSync(filePathString);
             result = fileStats ? fileStats.isFile() : false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Create the file at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the file was created as a result of this call.
+     * @param filePath The path to the file to create.
+     */
+    public createFile(filePath: main.Path | string): boolean {
+        let result: boolean = false;
+
+        const filePathString: string = main.toString(filePath);
+        if (filePathString) {
+            if (!this.fileExists(filePathString)) {
+                result = true;
+                this.writeFileContentsAsString(filePathString, "");
+            }
         }
 
         return result;

@@ -415,6 +415,39 @@ suite("mock", () => {
             });
         });
 
+        suite("createFolder()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.createFolder(undefined), false);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.createFolder(null), false);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.createFolder(""), false);
+            });
+
+            test(`with "folder"`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.createFolder("folder"), false);
+            });
+
+            test(`with "/folder" when root doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                assert.deepStrictEqual(fileSystem.rootExists("/"), false);
+                assert.deepStrictEqual(fileSystem.folderExists("/folder"), false);
+
+                assert.deepStrictEqual(fileSystem.createFolder("/folder"), true);
+
+                assert.deepStrictEqual(fileSystem.rootExists("/"), true);
+                assert.deepStrictEqual(fileSystem.folderExists("/folder"), true);
+            });
+        });
+
         suite("fileExists()", () => {
             test(`with undefined`, () => {
                 const fileSystem = new mock.FileSystem();

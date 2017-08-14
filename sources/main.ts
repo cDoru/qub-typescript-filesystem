@@ -70,10 +70,24 @@ export abstract class FileSystem {
     public abstract folderExists(folderPath: Path | string): boolean;
 
     /**
+     * Create the folder at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the folder was created as a result of this call.
+     * @param folderPath The path to the folder to create.
+     */
+    public abstract createFolder(folderPath: Path | string): boolean;
+
+    /**
      * Get whether or not the file at the provided path exists.
      * @param filePath The path to the file.
      */
     public abstract fileExists(filePath: Path | string): boolean;
+
+    /**
+     * Create the file at the provided path. All folders in the provided path will be created. The
+     * return value will be whether or not the file was created as a result of this call.
+     * @param filePath The path to the file to create.
+     */
+    public abstract createFile(filePath: Path | string): boolean;
 
     /**
      * Read the contents of the file at the provided filePath as a UTF-8 string. If the file doesn't
@@ -410,6 +424,13 @@ export class Folder implements Container {
     }
 
     /**
+     * Create this folder and return whether or not it was created as a result of this call.
+     */
+    public create(): boolean {
+        return this._fileSystem.createFolder(this._path);
+    }
+
+    /**
      * Get a reference to the folder at the provided path relative to this Folder.
      * @param folderPath The relative path to the folder.
      */
@@ -461,6 +482,13 @@ export class File implements Entry {
      */
     public exists(): boolean {
         return this._fileSystem.fileExists(this._path);
+    }
+
+    /**
+     * Create this file and return whether or not it was created as a result of this call.
+     */
+    public create(): boolean {
+        return this._fileSystem.createFile(this._path);
     }
 
     /**
