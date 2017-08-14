@@ -5,6 +5,50 @@ import * as main from "../sources/main";
 import * as mock from "../sources/mock";
 
 suite("main", () => {
+    suite("toPath()", () => {
+        test(`with undefined`, () => {
+            assert.deepStrictEqual(main.toPath(undefined), new main.Path(undefined));
+        });
+
+        test(`with null`, () => {
+            assert.deepStrictEqual(main.toPath(null), new main.Path(null));
+        });
+
+        test(`with string ""`, () => {
+            assert.deepStrictEqual(main.toPath(""), new main.Path(""));
+        });
+
+        test(`with string "hello"`, () => {
+            assert.deepStrictEqual(main.toPath("hello"), new main.Path("hello"));
+        });
+
+        test(`with path(undefined)`, () => {
+            assert.deepStrictEqual(main.toPath(new main.Path(undefined)), new main.Path(undefined));
+        });
+    });
+
+    suite("toString()", () => {
+        test(`with undefined`, () => {
+            assert.deepStrictEqual(main.toString(undefined), undefined);
+        });
+
+        test(`with null`, () => {
+            assert.deepStrictEqual(main.toString(null), null);
+        });
+
+        test(`with string ""`, () => {
+            assert.deepStrictEqual(main.toString(""), "");
+        });
+
+        test(`with string "hello"`, () => {
+            assert.deepStrictEqual(main.toString("hello"), "hello");
+        });
+
+        test(`with path(undefined)`, () => {
+            assert.deepStrictEqual(main.toString(new main.Path(undefined)), undefined);
+        });
+    });
+
     suite("Path", () => {
         suite("toString()", () => {
             function toStringTest(pathString: string): void {
@@ -264,22 +308,89 @@ suite("main", () => {
         });
     });
 
-    suite("Volume", () => {
+    suite("Root", () => {
         test("when it doesn't exist", () => {
             const fileSystem = new mock.FileSystem();
-            const volume = new main.Volume(fileSystem, new main.Path("C:\\"));
-            assert.deepStrictEqual(volume.getPath(), new main.Path("C:\\"));
-            assert.deepStrictEqual(volume.getParent(), undefined);
-            assert.deepStrictEqual(volume.exists(), false);
+            const root = new main.Root(fileSystem, new main.Path("C:\\"));
+            assert.deepStrictEqual(root.getPath(), new main.Path("C:\\"));
+            assert.deepStrictEqual(root.getParent(), undefined);
+            assert.deepStrictEqual(root.exists(), false);
         });
 
         test("when it does exist", () => {
             const fileSystem = new mock.FileSystem();
-            fileSystem.createMockVolume("D:/");
-            const volume = new main.Volume(fileSystem, new main.Path("D:/"));
-            assert.deepStrictEqual(volume.getPath(), new main.Path("D:/"));
-            assert.deepStrictEqual(volume.getParent(), undefined);
-            assert.deepStrictEqual(volume.exists(), true);
+            fileSystem.createMockRoot("D:/");
+            const root = new main.Root(fileSystem, new main.Path("D:/"));
+            assert.deepStrictEqual(root.getPath(), new main.Path("D:/"));
+            assert.deepStrictEqual(root.getParent(), undefined);
+            assert.deepStrictEqual(root.exists(), true);
+        });
+
+        suite("getFolder()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const folder: main.Folder = root.getFolder(undefined);
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const folder: main.Folder = root.getFolder(null);
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const folder: main.Folder = root.getFolder("");
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with "A"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const folder: main.Folder = root.getFolder("A");
+                assert.deepStrictEqual(folder, new main.Folder(fileSystem, new main.Path("/A")));
+            });
+        });
+
+        suite("getFile()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const file: main.File = root.getFile(undefined);
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const file: main.File = root.getFile(null);
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const file: main.File = root.getFile("");
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with "A"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const file: main.File = root.getFile("A");
+                assert.deepStrictEqual(file, new main.File(fileSystem, new main.Path("/A")));
+            });
+
+            test(`with "A/"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const root: main.Root = fileSystem.getRoot("/");
+                const file: main.File = root.getFile("A/");
+                assert.deepStrictEqual(file, undefined);
+            });
         });
     });
 
@@ -288,19 +399,88 @@ suite("main", () => {
             const fileSystem = new mock.FileSystem();
             const folder = new main.Folder(fileSystem, new main.Path("C:\\a"));
             assert.deepStrictEqual(folder.getPath(), new main.Path("C:\\a"));
-            assert.deepStrictEqual(folder.getParent(), new main.Volume(fileSystem, new main.Path("C:\\")));
+            assert.deepStrictEqual(folder.getParent(), new main.Root(fileSystem, new main.Path("C:\\")));
             assert.deepStrictEqual(folder.exists(), false);
         });
 
         test("when it does exist", () => {
             const fileSystem = new mock.FileSystem();
-            const mockVolume: mock.Volume = fileSystem.createMockVolume("D:/");
-            const mockFolderA: mock.Folder = mockVolume.createFolder("A");
+            const mockRoot: mock.Root = fileSystem.createMockRoot("D:/");
+            const mockFolderA: mock.Folder = mockRoot.createFolder("A");
             mockFolderA.createFolder("B");
             const folder = new main.Folder(fileSystem, new main.Path("D:/A/B/"));
             assert.deepStrictEqual(folder.getPath(), new main.Path("D:/A/B/"));
             assert.deepStrictEqual(folder.getParent(), new main.Folder(fileSystem, new main.Path("D:/A")));
             assert.deepStrictEqual(folder.exists(), true);
+        });
+
+        
+
+        suite("getFolder()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const folder: main.Folder = a.getFolder(undefined);
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const folder: main.Folder = a.getFolder(null);
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const folder: main.Folder = a.getFolder("");
+                assert.deepStrictEqual(folder, undefined);
+            });
+
+            test(`with "B"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const folder: main.Folder = a.getFolder("B");
+                assert.deepStrictEqual(folder, new main.Folder(fileSystem, new main.Path("/A/B")));
+            });
+        });
+
+        suite("getFile()", () => {
+            test(`with undefined`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const file: main.File = a.getFile(undefined);
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with null`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const file: main.File = a.getFile(null);
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with ""`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const file: main.File = a.getFile("");
+                assert.deepStrictEqual(file, undefined);
+            });
+
+            test(`with "B"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const file: main.File = a.getFile("B");
+                assert.deepStrictEqual(file, new main.File(fileSystem, new main.Path("/A/B")));
+            });
+
+            test(`with "B/"`, () => {
+                const fileSystem = new mock.FileSystem();
+                const a: main.Folder = fileSystem.getFolder("/A");
+                const file: main.File = a.getFile("B/");
+                assert.deepStrictEqual(file, undefined);
+            });
         });
     });
 
@@ -309,19 +489,41 @@ suite("main", () => {
             const fileSystem = new mock.FileSystem();
             const file = new main.File(fileSystem, new main.Path("C:\\a"));
             assert.deepStrictEqual(file.getPath(), new main.Path("C:\\a"));
-            assert.deepStrictEqual(file.getParent(), new main.Volume(fileSystem, new main.Path("C:\\")));
+            assert.deepStrictEqual(file.getParent(), new main.Root(fileSystem, new main.Path("C:\\")));
             assert.deepStrictEqual(file.exists(), false);
         });
 
         test("when it does exist", () => {
             const fileSystem = new mock.FileSystem();
-            const mockVolume: mock.Volume = fileSystem.createMockVolume("D:/");
-            const mockFolderA: mock.Folder = mockVolume.createFolder("A");
+            const mockRoot: mock.Root = fileSystem.createMockRoot("D:/");
+            const mockFolderA: mock.Folder = mockRoot.createFolder("A");
             mockFolderA.createFile("B");
             const file = new main.File(fileSystem, new main.Path("D:/A/B"));
             assert.deepStrictEqual(file.getPath(), new main.Path("D:/A/B"));
             assert.deepStrictEqual(file.getParent(), new main.Folder(fileSystem, new main.Path("D:/A")));
             assert.deepStrictEqual(file.exists(), true);
+        });
+
+        suite("readContentsAsString()", () => {
+            test(`when file doesn't exist`, () => {
+                const fileSystem = new mock.FileSystem();
+                const file: main.File = fileSystem.getFile("C:\\folder\file.txt");
+                assert.deepStrictEqual(file.readContentsAsString(), undefined);
+            });
+
+            test(`when file exists but doesn't have any content`, () => {
+                const fileSystem = new mock.FileSystem();
+                const file: main.File = fileSystem.getFile("C:\\folder\file.txt");
+                file.writeContentsAsString("");
+                assert.deepStrictEqual(file.readContentsAsString(), "");
+            });
+
+            test(`when file exists and has content`, () => {
+                const fileSystem = new mock.FileSystem();
+                const file: main.File = fileSystem.getFile("C:\\folder\file.txt");
+                file.writeContentsAsString("hello");
+                assert.deepStrictEqual(file.readContentsAsString(), "hello");
+            });
         });
     });
 });

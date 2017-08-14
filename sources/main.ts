@@ -10,11 +10,19 @@ export function toPath(path: Path | string): Path {
 }
 
 /**
+ * Ensure that the provided value is a string.
+ * @param path The path to ensure is a string.
+ */
+export function toString(path: Path | string): string {
+    return path instanceof Path ? path.toString() : path;
+}
+
+/**
  * A set of functions for interacting with the file system.
  */
 export abstract class FileSystem {
-    public getVolume(volumePath: Path | string): Volume {
-        return volumePath && volumePath.toString() ? new Volume(this, toPath(volumePath)) : undefined;
+    public getRoot(rootPath: Path | string): Root {
+        return rootPath && rootPath.toString() ? new Root(this, toPath(rootPath)) : undefined;
     }
 
     /**
@@ -50,10 +58,10 @@ export abstract class FileSystem {
     }
 
     /**
-     * Get whether or not the Volume at the provided path exists.
-     * @param volumePath The path to the Volume.
+     * Get whether or not the Root at the provided path exists.
+     * @param rootPath The path to the Root.
      */
-    public abstract volumeExists(volumePath: Path | string): boolean;
+    public abstract rootExists(rootPath: Path | string): boolean;
 
     /**
      * Get whether or not the Folder at the provided path exists.
@@ -66,10 +74,22 @@ export abstract class FileSystem {
      * @param filePath The path to the file.
      */
     public abstract fileExists(filePath: Path | string): boolean;
+
+    /**
+     * Read the contents of the file at the provided filePath as a UTF-8 string. If the file doesn't
+     * exist, then undefined will be returned.
+     */
+    public abstract readFileContentsAsString(filePath: Path | string): string;
+
+    /**
+     * Write the provided string contents to the file at the provided file path using UTF-8
+     * encoding. If the file doesn't exist, then it will be created.
+     */
+    public abstract writeFileContentsAsString(filePath: Path | string, fileContents: string): void;
 }
 
 /**
- * A path to a Volume, Folder, or File in a FileSystem.
+ * A path to a Root, Folder, or File in a FileSystem.
  */
 export class Path {
     constructor(private _pathString: string) {
@@ -154,7 +174,7 @@ export class Path {
     }
 
     /**
-     * Get the volume name, folder names, and/or file name that exists in this path.
+     * Get the root name, folder names, and/or file name that exists in this path.
      */
     public getSegments(): qub.Iterable<string> {
         const normalizedPathString: string = Path.normalizePathString(this._pathString);
@@ -166,12 +186,12 @@ export class Path {
      * Add the provided segment (folder name or file name) to this Path.
      * @param segment The segment (folder name or file name) to add to this Path.
      */
-    public add(segment: string): Path {
+    public add(segment: Path | string): Path {
         let result: Path = this;
         if (segment) {
             let resultPathString: string = this._pathString;
             if (!resultPathString) {
-                resultPathString = segment;
+                resultPathString = toString(segment);
             }
             else {
                 if (!resultPathString.endsWith("/") && !resultPathString.endsWith("\\")) {
@@ -185,14 +205,14 @@ export class Path {
     }
 
     /**
-     * Get whether or not this Path has a Volume specified.
+     * Get whether or not this Path has a Root specified.
      */
     public isRooted(): boolean {
         return !!this.getRootPathString();
     }
 
     /**
-     * Get the path string of the root Volume of this Path, if it exists.
+     * Get the path string of the root Root of this Path, if it exists.
      */
     public getRootPathString(): string {
         let result: string;
@@ -218,7 +238,7 @@ export class Path {
     }
 
     /**
-     * Get the path of the root Volume of this Path, if it exists.
+     * Get the path to the Root of this Path, if it exists.
      */
     public getRootPath(): Path {
         const rootPathString: string = this.getRootPathString();
@@ -299,21 +319,21 @@ export interface Container extends Entry {
 }
 
 /**
- * A Volume (or Drive) in a FileSystem.
+ * A Root in a FileSystem.
  */
-export class Volume implements Container {
+export class Root implements Container {
     constructor(private _fileSystem: FileSystem, private _path: Path) {
     }
 
     /**
-     * Get the Path to this Volume.
+     * Get the Path to this Root.
      */
     public getPath(): Path {
         return this._path;
     }
 
     /**
-     * Get the parent container of this Volume. This will always return undefined since a volume is
+     * Get the parent container of this Root. This will always return undefined since a root is
      * a top-level construct in the FileSystem.
      */
     public getParent(): Container {
@@ -321,10 +341,33 @@ export class Volume implements Container {
     }
 
     /**
-     * Get whether or not this Volume exists.
+     * Get whether or not this Root exists.
      */
     public exists(): boolean {
-        return this._fileSystem.volumeExists(this._path);
+        return this._fileSystem.rootExists(this._path);
+    }
+
+    /**
+     * Get a reference to the folder at the provided path relative to this Root.
+     * @param folderPath The relative path to the folder.
+     */
+    public getFolder(folderPath: Path | string): Folder {
+        return folderPath && folderPath.toString() ? new Folder(this._fileSystem, this._path.add(folderPath)) : undefined;
+    }
+
+    /**
+     * Get a reference to the file at the provided path relative to this Root.
+     * @param filePath The relative path to the file.
+     */
+    public getFile(filePath: Path | string): File {
+        let result: File;
+
+        const filePathString: string = toString(filePath);
+        if (filePathString && !filePathString.endsWith("/") && !filePathString.endsWith("\\")) {
+            result = new File(this._fileSystem, this._path.add(filePath));
+        }
+
+        return result;
     }
 }
 
@@ -335,11 +378,11 @@ export class Volume implements Container {
  */
 function getParentContainer(entryPath: Path, fileSystem: FileSystem): Container {
     const parentPath: Path = entryPath.getParentPath();
-    return parentPath.getParentPath() ? new Folder(fileSystem, parentPath) : new Volume(fileSystem, parentPath);
+    return parentPath.getParentPath() ? new Folder(fileSystem, parentPath) : new Root(fileSystem, parentPath);
 }
 
 /**
- * A Folder (or Directory) in a Volume (or Drive) in a FileSystem.
+ * A Folder (or Directory) in a Root (or Drive) in a FileSystem.
  */
 export class Folder implements Container {
     constructor(private _fileSystem: FileSystem, private _path: Path) {
@@ -365,10 +408,35 @@ export class Folder implements Container {
     public exists(): boolean {
         return this._fileSystem.folderExists(this._path);
     }
+
+    /**
+     * Get a reference to the folder at the provided path relative to this Folder.
+     * @param folderPath The relative path to the folder.
+     */
+    public getFolder(folderPath: Path | string): Folder {
+        return folderPath && folderPath.toString() ? new Folder(this._fileSystem, this._path.add(folderPath)) : undefined;
+    }
+
+    /**
+     * Get a reference to the file at the provided path relative to this Folder.
+     * @param filePath The relative path to the file.
+     */
+    public getFile(filePath: Path | string): File {
+        let result: File;
+
+        if (filePath) {
+            const filePathString: string = filePath.toString();
+            if (filePathString && !filePathString.endsWith("/") && !filePathString.endsWith("\\")) {
+                result = new File(this._fileSystem, this._path.add(filePath));
+            }
+        }
+
+        return result;
+    }
 }
 
 /**
- * A File in a Volume (or Drive) in a FileSystem.
+ * A File in a FileSystem.
  */
 export class File implements Entry {
     constructor(private _fileSystem: FileSystem, private _path: Path) {
@@ -393,5 +461,21 @@ export class File implements Entry {
      */
     public exists(): boolean {
         return this._fileSystem.fileExists(this._path);
+    }
+
+    /**
+     * Read the contents of this file as a UTF-8 string. If the file doesn't exist, then undefined
+     * will be returned.
+     */
+    public readContentsAsString(): string {
+        return this._fileSystem.readFileContentsAsString(this._path);
+    }
+
+    /**
+     * Write the provided string contents to this file using UTF-8 encoding. If this file doesn't
+     * exist, then it will be created.
+     */
+    public writeContentsAsString(fileContents: string): void {
+        this._fileSystem.writeFileContentsAsString(this._path, fileContents);
     }
 }
